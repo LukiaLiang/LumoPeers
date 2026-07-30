@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微光互助社</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="home-page" class="page active">
+        <header class="hero-section">
+            <div class="floating-elements">
+                <div class="float-circle float-1"></div>
+                <div class="float-circle float-2"></div>
+                <div class="float-circle float-3"></div>
+                <div class="float-circle float-4"></div>
+                <div class="float-circle float-5"></div>
+            </div>
+            <div class="glow-container">
+                <div class="title-decoration">
+                    <span class="deco-left">✦</span>
+                    <h1 class="main-title">微光互助社</h1>
+                    <span class="deco-right">✦</span>
+                </div>
+                <p class="sub-title">用微光，照亮前行的路</p>
+                <p class="motto">"每一道微光，都值得被看见"</p>
+            </div>
+            <button id="questionnaire-btn" class="questionnaire-btn">
+                <span class="btn-icon">💛</span>
+                <span class="btn-text">如果需要帮助，点击这里让我们了解你</span>
+            </button>
+            <div class="user-entry" id="user-entry">
+                <button class="entry-btn" id="login-entry-btn">登录</button>
+                <button class="entry-btn entry-btn-outline" id="register-entry-btn">注册</button>
+                <button class="entry-btn entry-btn-guest" id="guest-entry-btn">访客浏览</button>
+            </div>
+        </header>
+
+        <section class="purpose-section">
+            <div class="purpose-deco-top">
+                <span class="deco-icon deco-icon-left">💛</span>
+                <h2 class="section-title">社团宗旨</h2>
+                <span class="deco-icon deco-icon-right">🤝</span>
+            </div>
+            <div class="purpose-content">
+                <div class="purpose-corner corner-tl">🌱</div>
+                <div class="purpose-corner corner-tr">✨</div>
+                <p>致力于帮助面临学业困难、心理焦虑、产生逃避情绪的同学走出困境，重建心态，主动寻求帮助，重拾自律，回归正常的高校学习与生活。</p>
+                <div class="purpose-deco-line">
+                    <span class="line-dot">💛</span>
+                    <span class="line-pulse"></span>
+                    <span class="line-dot">💙</span>
+                    <span class="line-pulse"></span>
+                    <span class="line-dot">💗</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="action-section">
+            <button id="members-btn" class="primary-btn">社团成员</button>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2026 微光互助社</p>
+        </footer>
+    </div>
+
+    <div id="members-page" class="page">
+        <header class="page-header">
+            <button id="members-back-btn" class="back-btn">← 返回</button>
+            <h1 class="page-title">已走出困境的学生们</h1>
+        </header>
+
+        <main class="members-container"></main>
+    </div>
+
+    <div id="questionnaire-page" class="page">
+        <header class="page-header">
+            <button id="questionnaire-back-btn" class="back-btn">← 返回</button>
+            <h1 class="page-title">帮助评估问卷</h1>
+        </header>
+
+        <main class="questionnaire-container">
+            <div class="questionnaire-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <span class="progress-text">已完成 <span id="completed-count">0</span>/35</span>
+            </div>
+
+            <div class="questionnaire-section" id="section-1">
+                <h3 class="section-label">第一维度：学习动力</h3>
+                <div class="questions-list" id="questions-1"></div>
+            </div>
+
+            <div class="questionnaire-section" id="section-2">
+                <h3 class="section-label">第二维度：学习执行</h3>
+                <div class="questions-list" id="questions-2"></div>
+            </div>
+
+            <div class="questionnaire-section" id="section-3">
+                <h3 class="section-label">第三维度：情绪状态</h3>
+                <div class="questions-list" id="questions-3"></div>
+            </div>
+
+            <div class="questionnaire-section" id="section-4">
+                <h3 class="section-label">第四维度：社交支持</h3>
+                <div class="questions-list" id="questions-4"></div>
+            </div>
+
+            <div class="questionnaire-section" id="section-5">
+                <h3 class="section-label">第五维度：未来规划</h3>
+                <div class="questions-list" id="questions-5"></div>
+            </div>
+
+            <div class="questionnaire-section" id="section-behavior">
+                <h3 class="section-label">行为情况（过去一个月）</h3>
+                <div class="questions-list" id="questions-behavior"></div>
+            </div>
+
+            <div class="questionnaire-section" id="section-severity">
+                <h3 class="section-label">严重程度指数（过去两周）</h3>
+                <div class="questions-list" id="questions-severity"></div>
+            </div>
+
+            <div class="submit-section">
+                <button id="submit-btn" class="submit-btn">提交问卷</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="info-page" class="page">
+        <header class="page-header">
+            <button id="info-back-btn" class="back-btn">← 返回</button>
+            <h1 class="page-title">信息采集</h1>
+        </header>
+
+        <main class="info-container">
+            <div class="info-tip">
+                <p class="tip-title">💛 温馨提示</p>
+                <p class="tip-content">请填写以下信息，以便我们能及时与您取得联系。所有信息将被严格保密，仅用于互助帮扶。</p>
+            </div>
+
+            <div class="info-section">
+                <div class="info-item">
+                    <label class="info-label required">姓名</label>
+                    <input type="text" id="info-name" class="info-input" placeholder="请输入您的姓名">
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label required">性别</label>
+                    <div class="radio-group" id="info-gender">
+                        <label class="radio-item">
+                            <input type="radio" name="gender" value="男">
+                            <span>男</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="gender" value="女">
+                            <span>女</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label required">学校</label>
+                    <select id="info-school" class="info-select">
+                        <option value="">请选择学校</option>
+                        <optgroup label="双一流/985高校">
+                            <option value="北京大学">北京大学</option>
+                            <option value="清华大学">清华大学</option>
+                            <option value="复旦大学">复旦大学</option>
+                            <option value="上海交通大学">上海交通大学</option>
+                            <option value="浙江大学">浙江大学</option>
+                            <option value="南京大学">南京大学</option>
+                            <option value="中国科学技术大学">中国科学技术大学</option>
+                            <option value="武汉大学">武汉大学</option>
+                            <option value="华中科技大学">华中科技大学</option>
+                            <option value="中山大学">中山大学</option>
+                            <option value="西安交通大学">西安交通大学</option>
+                            <option value="哈尔滨工业大学">哈尔滨工业大学</option>
+                            <option value="同济大学">同济大学</option>
+                            <option value="北京航空航天大学">北京航空航天大学</option>
+                            <option value="北京师范大学">北京师范大学</option>
+                            <option value="东南大学">东南大学</option>
+                            <option value="四川大学">四川大学</option>
+                            <option value="吉林大学">吉林大学</option>
+                            <option value="南开大学">南开大学</option>
+                            <option value="天津大学">天津大学</option>
+                            <option value="山东大学">山东大学</option>
+                            <option value="中南大学">中南大学</option>
+                            <option value="中国人民大学">中国人民大学</option>
+                            <option value="北京理工大学">北京理工大学</option>
+                            <option value="厦门大学">厦门大学</option>
+                            <option value="大连理工大学">大连理工大学</option>
+                            <option value="华东师范大学">华东师范大学</option>
+                            <option value="华南理工大学">华南理工大学</option>
+                            <option value="电子科技大学">电子科技大学</option>
+                            <option value="湖南大学">湖南大学</option>
+                            <option value="重庆大学">重庆大学</option>
+                            <option value="兰州大学">兰州大学</option>
+                            <option value="西北工业大学">西北工业大学</option>
+                            <option value="华东师范大学">华东师范大学</option>
+                        </optgroup>
+                        <optgroup label="其他一本高校">
+                            <option value="其他">其他（请在下方填写）</option>
+                        </optgroup>
+                    </select>
+                    <input type="text" id="info-school-other" class="info-input school-other" placeholder="请填写学校名称" style="display:none;">
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label required">院系</label>
+                    <input type="text" id="info-department" class="info-input" placeholder="如：计算机科学与技术学院">
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label required">年级</label>
+                    <select id="info-grade" class="info-select">
+                        <option value="">请选择年级</option>
+                    </select>
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label required">毕业届</label>
+                    <select id="info-graduation" class="info-select">
+                        <option value="">请选择毕业届</option>
+                    </select>
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label required">联系电话</label>
+                    <input type="tel" id="info-phone" class="info-input" placeholder="请输入手机号" maxlength="11">
+                </div>
+
+                <div class="info-item">
+                    <label class="info-label">微信</label>
+                    <input type="text" id="info-wechat" class="info-input" placeholder="请输入微信号（选填）">
+                </div>
+            </div>
+
+            <div class="submit-section">
+                <button id="info-submit-btn" class="submit-btn">完成信息填写</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="thankyou-page" class="page">
+        <div class="thankyou-container">
+            <div class="thankyou-icon">💌</div>
+            <h1 class="thankyou-title">谢谢！</h1>
+            <p class="thankyou-text">我们已收到你的来信，请等待我们的联系~</p>
+            <p class="thankyou-sub">我们的志愿者会尽快与你取得联系，请保持电话畅通。</p>
+            <button id="thankyou-home-btn" class="primary-btn">返回首页</button>
+        </div>
+    </div>
+
+    <div id="login-page" class="page">
+        <header class="page-header">
+            <button id="login-back-btn" class="back-btn">← 返回</button>
+            <h1 class="page-title">管理员登录</h1>
+        </header>
+
+        <main class="login-container">
+            <div class="login-box">
+                <div class="login-icon">🔐</div>
+                <h2 class="login-title">管理员登录</h2>
+                <div class="login-item">
+                    <label class="login-label">账号</label>
+                    <input type="text" id="login-username" class="login-input" placeholder="请输入管理员账号">
+                </div>
+                <div class="login-item">
+                    <label class="login-label">密码</label>
+                    <input type="password" id="login-password" class="login-input" placeholder="请输入密码">
+                </div>
+                <button id="login-submit-btn" class="submit-btn login-btn">登 录</button>
+                <div class="login-tip">
+                    <span>还没有管理员账号？</span>
+                    <button id="open-register-btn" class="submit-btn login-btn" type="button">注册管理员</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="register-page" class="page">
+        <header class="page-header">
+            <button id="register-back-btn" class="back-btn">← 返回</button>
+            <h1 class="page-title">管理员注册</h1>
+        </header>
+
+        <main class="login-container">
+            <div class="login-box">
+                <div class="login-icon">🛡️</div>
+                <h2 class="login-title">创建管理员账号</h2>
+                <div class="login-item">
+                    <label class="login-label">用户名</label>
+                    <input type="text" id="register-username" class="login-input" placeholder="请输入用户名">
+                </div>
+                <div class="login-item">
+                    <label class="login-label">密码</label>
+                    <input type="password" id="register-password" class="login-input" placeholder="请输入密码">
+                </div>
+                <div class="login-item">
+                    <label class="login-label">确认密码</label>
+                    <input type="password" id="register-confirm-password" class="login-input" placeholder="请再次输入密码">
+                </div>
+                <div class="login-item">
+                    <label class="login-label">管理员校验码</label>
+                    <input type="password" id="register-key" class="login-input" placeholder="请输入管理员校验码">
+                </div>
+                <button id="register-submit-btn" class="submit-btn login-btn">注册管理员</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="admin-page" class="page">
+        <header class="page-header">
+            <button id="admin-back-btn" class="back-btn">← 退出</button>
+            <h1 class="page-title">问卷管理中心</h1>
+            <div class="admin-actions">
+                <button id="admin-review-btn" class="review-btn">注册审核 <span id="admin-review-count" class="review-count" style="display:none">0</span></button>
+                <button id="admin-logout-btn" class="logout-btn">退出登录</button>
+            </div>
+        </header>
+
+        <main class="admin-container">
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-total">0</div>
+                    <div class="stat-label">总问卷数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-today">0</div>
+                    <div class="stat-label">今日新增</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-male">0</div>
+                    <div class="stat-label">男生</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-female">0</div>
+                    <div class="stat-label">女生</div>
+                </div>
+            </div>
+
+            <div class="admin-search">
+                <input type="text" id="admin-search-input" class="admin-search-input" placeholder="搜索姓名、学校、专业、年级...">
+                <button id="admin-export-btn" class="admin-export-btn">📥 导出数据</button>
+            </div>
+
+            <div class="admin-list" id="admin-list">
+            </div>
+        </main>
+    </div>
+
+    <div id="admin-detail-page" class="page">
+        <header class="page-header">
+            <button id="detail-back-btn" class="back-btn">← 返回列表</button>
+            <h1 class="page-title">问卷详情</h1>
+        </header>
+
+        <main class="detail-container" id="detail-container">
+        </main>
+    </div>
+
+    <div id="admin-entry" class="admin-entry" title="管理员入口">
+        🔧
+    </div>
+
+    <div id="user-access-modal" class="user-access-modal hidden">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-panel">
+            <button class="close-modal-btn" id="close-user-modal" type="button" aria-label="关闭">×</button>
+            <h2 id="user-modal-title">登录</h2>
+            <div class="user-modal-body">
+                <label class="modal-field">
+                    <span>用户名</span>
+                    <input type="text" id="user-modal-username" class="login-input" placeholder="请输入用户名">
+                </label>
+                <label class="modal-field">
+                    <span>密码</span>
+                    <input type="password" id="user-modal-password" class="login-input" placeholder="请输入密码">
+                </label>
+                <label class="modal-field" id="modal-reg-type" style="display:none;">
+                    <span>注册类型</span>
+                    <select id="user-modal-type" class="info-select">
+                        <option value="A">A. 已走出困境</option>
+                        <option value="B">B. 困境中</option>
+                        <option value="C">C. 专业辅导</option>
+                        <option value="D">D. 家长</option>
+                    </select>
+                </label>
+                <button id="user-modal-submit" class="submit-btn">登录</button>
+                <p class="user-modal-switch">还没有账号？ <button id="switch-register" class="link-btn" type="button">立即注册</button></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-review-modal" class="user-access-modal hidden">
+        <div class="modal-backdrop" id="admin-review-backdrop"></div>
+        <div class="modal-panel">
+            <button class="close-modal-btn" id="close-admin-review-modal" type="button" aria-label="关闭">×</button>
+            <h2>注册申请审核</h2>
+            <div id="admin-review-body" class="user-modal-body">
+                <!-- 列表由 JS 渲染 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
