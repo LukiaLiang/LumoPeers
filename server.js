@@ -12,6 +12,8 @@ const ADMIN_REGISTER_KEY = 'WG2026@SecretKey';
 const adminDB = new Map();
 const recordsDB = new Map();
 const authSessions = new Map();
+const userAccountsDB = new Map();
+const registrationAppsDB = new Map();
 
 app.use(cors({
     origin: true,
@@ -195,6 +197,111 @@ app.delete('/api/admin/records/:id', authMiddleware, (req, res) => {
     res.json({ success: true });
 });
 
+app.post('/api/user/register', async (req, res) => {
+    const { username, password, type } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ message: '用户名和密码不能为空' });
+    }
+    if (password.length < 6) {
+        return res.status(400).json({ message: '密码至少 6 位' });
+    }
+    if (userAccountsDB.has(username)) {
+        return res.status(409).json({ message: '该用户名已被占用' });
+    }
+
+    const pending = [...registrationAppsDB.values()].find(app => app.username === username && app.status === 'pending');
+    if (pending) {
+        return res.status(409).json({ message: '该用户名已有待审核申请' });
+    }
+
+    const id = 'app_' + Date.now() + '_' + Math.floor(Math.random() * 9000 + 1000);
+    const passwordHash = await bcrypt.hash(password, 10);
+    const app = {
+        id,
+        username,
+        passwordHash,
+        type: ['A', 'B', 'C', 'D'].includes(type) ? type : 'B',
+        status: 'pending',
+        submittedAt: new Date().toISOString(),
+        reviewedBy: null,
+        reviewedAt: null,
+        adminDecision: null
+    };
+    registrationAppsDB.set(id, app);
+    res.json({ success: true, id });
+});
+
+app.post('/api/user/login', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ message: '用户名和密码不能为空' });
+    }
+
+    const account = userAccountsDB.get(username);
+    if (!account || !(await bcrypt.compare(password, account.passwordHash))) {
+        return res.status(401).json({ message: '用户名或密码错误，或账号尚未通过审核' });
+    }
+
+    res.json({ success: true, username, type: account.type || null });
+});
+
+app.get('/api/admin/user-apps', authMiddleware, (req, res) => {
+    const apps = [...registrationAppsDB.values()]
+        .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+        .map(app => ({
+            id: app.id,
+            username: app.username,
+            type: app.type,
+            status: app.status,
+            submittedAt: app.submittedAt,
+            reviewedBy: app.reviewedBy,
+            reviewedAt: app.reviewedAt,
+            adminDecision: app.adminDecision
+        }));
+    res.json({ apps });
+});
+
+app.post('/api/admin/user-apps/:id/approve', authMiddleware, (req, res) => {
+    const app = registrationAppsDB.get(req.params.id);
+    if (!app) {
+        return res.status(404).json({ message: '未找到申请' });
+    }
+    if (app.status !== 'pending') {
+        return res.status(409).json({ message: '该申请已处理' });
+    }
+
+    if (!userAccountsDB.has(app.username)) {
+        userAccountsDB.set(app.username, {
+            username: app.username,
+            passwordHash: app.passwordHash,
+            type: app.type
+        });
+    }
+    app.status = 'approved';
+    app.reviewedBy = req.admin.username;
+    app.reviewedAt = new Date().toISOString();
+    app.adminDecision = 'approved';
+    registrationAppsDB.set(app.id, app);
+    res.json({ success: true });
+});
+
+app.post('/api/admin/user-apps/:id/reject', authMiddleware, (req, res) => {
+    const app = registrationAppsDB.get(req.params.id);
+    if (!app) {
+        return res.status(404).json({ message: '未找到申请' });
+    }
+    if (app.status !== 'pending') {
+        return res.status(409).json({ message: '该申请已处理' });
+    }
+
+    app.status = 'rejected';
+    app.reviewedBy = req.admin.username;
+    app.reviewedAt = new Date().toISOString();
+    app.adminDecision = 'rejected';
+    registrationAppsDB.set(app.id, app);
+    res.json({ success: true });
+});
+
 app.use((req, res, next) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ message: '接口未找到' });
@@ -210,4 +317,3 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
-

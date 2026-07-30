@@ -408,39 +408,44 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const accounts = getStoredUserAccounts();
-
         if (userAccessMode === 'register') {
-            // register creates application instead of immediate account
-            if (accounts[username]) {
-                showToast('该用户名已被占用');
-                return;
-            }
             if (password.length < 6) {
                 showToast('密码至少 6 位');
                 return;
             }
             const regTypeEl = document.getElementById('user-modal-type');
             const regType = regTypeEl ? regTypeEl.value : 'B';
-            submitRegistrationApplication(username, password, regType);
-            showToast('注册申请已提交，等待管理员审核');
+            userModalSubmit.disabled = true;
+            apiRequest('/api/user/register', {
+                method: 'POST',
+                body: JSON.stringify({ username: username, password: password, type: regType })
+            }).then(function() {
+                showToast('注册申请已提交，等待管理员审核');
+                closeUserAccessModal();
+                renderAdminReviewNotification();
+            }).catch(function() {
+            }).finally(function() {
+                userModalSubmit.disabled = false;
+            });
+            return;
+        }
+
+        userModalSubmit.disabled = true;
+        apiRequest('/api/user/login', {
+            method: 'POST',
+            body: JSON.stringify({ username: username, password: password })
+        }).then(function(result) {
+            showToast('登录成功');
+            isUserLoggedIn = true;
+            loggedInUser = result.username || username;
+            loggedInUserType = result.type || null;
+            setStoredUserSession({ username: loggedInUser, type: loggedInUserType });
+            updateUserEntryUI();
             closeUserAccessModal();
-            return;
-        }
-
-        const accountInfo = getAccountInfo(accounts, username);
-        if (!accountInfo || accountInfo.password !== password) {
-            showToast('用户名或密码错误');
-            return;
-        }
-
-        showToast('登录成功');
-        isUserLoggedIn = true;
-        loggedInUser = username;
-        loggedInUserType = accountInfo.type || null;
-        setStoredUserSession({ username: username, type: loggedInUserType });
-        updateUserEntryUI();
-        closeUserAccessModal();
+        }).catch(function() {
+        }).finally(function() {
+            userModalSubmit.disabled = false;
+        });
     }
 
     function toggleUserAccessMode() {
@@ -700,14 +705,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const btn = document.getElementById('admin-review-btn');
         const countEl = document.getElementById('admin-review-count');
         if (!btn || !countEl) return;
-        const apps = getStoredRegistrationApps();
-        const pending = apps.filter(a => a.status === 'pending').length;
-        if (pending > 0) {
-            countEl.style.display = 'inline-block';
-            countEl.textContent = pending;
-        } else {
+        if (!isAdminLoggedIn) {
             countEl.style.display = 'none';
+            return;
         }
+        apiRequest('/api/admin/user-apps', { method: 'GET' }).then(function(result) {
+            const apps = result && result.apps ? result.apps : [];
+            const pending = apps.filter(a => a.status === 'pending').length;
+            if (pending > 0) {
+                countEl.style.display = 'inline-block';
+                countEl.textContent = pending;
+            } else {
+                countEl.style.display = 'none';
+            }
+        }).catch(function() {
+            countEl.style.display = 'none';
+        });
     }
 
     function openAdminReviewModal() {
@@ -726,82 +739,72 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderAdminReviewList() {
         const body = document.getElementById('admin-review-body');
         if (!body) return;
-        const apps = getStoredRegistrationApps();
-        if (!apps || apps.length === 0) {
-            body.innerHTML = '<div class="admin-empty"><p>暂无注册申请</p></div>';
-            return;
-        }
-        const rows = apps.map(app => {
-            const statusLabel = app.status === 'pending' ? '待审核' : (app.status === 'approved' ? '已通过' : '已拒绝');
-            const actionBtns = app.status === 'pending' ? `
-                <button class="submit-btn" data-action="approve" data-id="${app.id}">通过</button>
-                <button class="text-btn" data-action="reject" data-id="${app.id}">拒绝</button>
-            ` : '';
+        body.innerHTML = '<div class="admin-empty"><p>正在加载注册申请...</p></div>';
+        apiRequest('/api/admin/user-apps', { method: 'GET' }).then(function(result) {
+            const apps = result && result.apps ? result.apps : [];
+            if (!apps || apps.length === 0) {
+                body.innerHTML = '<div class="admin-empty"><p>暂无注册申请</p></div>';
+                return;
+            }
+            const rows = apps.map(app => {
+                const statusLabel = app.status === 'pending' ? '待审核' : (app.status === 'approved' ? '已通过' : '已拒绝');
+                const submittedAt = app.submittedAt ? app.submittedAt.slice(0, 19).replace('T', ' ') : '未知时间';
+                const actionBtns = app.status === 'pending' ? `
+                    <button class="submit-btn" data-action="approve" data-id="${app.id}">通过</button>
+                    <button class="text-btn" data-action="reject" data-id="${app.id}">拒绝</button>
+                ` : '';
 
-            return `
-                <div class="detail-section" style="margin-bottom:12px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <div>
-                            <div style="font-weight:700;color:#374a73">${app.username} <span style="font-size:0.9rem;color:#6b7ba7;margin-left:8px">类型：${app.type}</span></div>
-                            <div style="font-size:0.9rem;color:#6b7ba7">提交时间：${app.submittedAt.slice(0,19).replace('T',' ')}</div>
-                        </div>
-                        <div style="text-align:right">
-                            <div style="margin-bottom:6px;color:#5b7bb4;font-weight:600">${statusLabel}</div>
-                            ${actionBtns}
+                return `
+                    <div class="detail-section" style="margin-bottom:12px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:700;color:#374a73">${app.username} <span style="font-size:0.9rem;color:#6b7ba7;margin-left:8px">类型：${app.type}</span></div>
+                                <div style="font-size:0.9rem;color:#6b7ba7">提交时间：${submittedAt}</div>
+                            </div>
+                            <div style="text-align:right">
+                                <div style="margin-bottom:6px;color:#5b7bb4;font-weight:600">${statusLabel}</div>
+                                ${actionBtns}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
 
-        body.innerHTML = rows;
+            body.innerHTML = rows;
 
-        // bind action buttons
-        body.querySelectorAll('[data-action]').forEach(btn => {
-            const action = btn.getAttribute('data-action');
-            const id = btn.getAttribute('data-id');
-            btn.addEventListener('click', function() {
-                if (action === 'approve') approveApplication(id);
-                else if (action === 'reject') rejectApplication(id);
+            body.querySelectorAll('[data-action]').forEach(btn => {
+                const action = btn.getAttribute('data-action');
+                const id = btn.getAttribute('data-id');
+                btn.addEventListener('click', function() {
+                    if (action === 'approve') approveApplication(id);
+                    else if (action === 'reject') rejectApplication(id);
+                });
             });
+        }).catch(function() {
+            body.innerHTML = '<div class="admin-empty"><p>加载失败，请检查后端服务</p></div>';
         });
     }
 
     function approveApplication(appId) {
         if (!isAdminLoggedIn) { showToast('请先以管理员身份登录'); return; }
-        const apps = getStoredRegistrationApps();
-        const idx = apps.findIndex(a => a.id === appId);
-        if (idx === -1) { showToast('未找到申请'); return; }
-        const app = apps[idx];
-        if (app.status !== 'pending') { showToast('该申请已处理'); return; }
-        // create account
-        const accounts = getStoredUserAccounts();
-        accounts[app.username] = { password: app.password, type: app.type };
-        setStoredUserAccounts(accounts);
-        apps[idx].status = 'approved';
-        apps[idx].reviewedBy = adminUsername || 'admin';
-        apps[idx].reviewedAt = new Date().toISOString();
-        apps[idx].adminDecision = 'approved';
-        setStoredRegistrationApps(apps);
-        showToast(`已通过 ${app.username} 的注册申请`);
-        renderAdminReviewList();
-        renderAdminReviewNotification();
+        apiRequest('/api/admin/user-apps/' + encodeURIComponent(appId) + '/approve', {
+            method: 'POST'
+        }).then(function() {
+            showToast('注册申请已通过');
+            renderAdminReviewList();
+            renderAdminReviewNotification();
+        }).catch(function() {});
     }
 
     function rejectApplication(appId) {
         if (!isAdminLoggedIn) { showToast('请先以管理员身份登录'); return; }
-        const apps = getStoredRegistrationApps();
-        const idx = apps.findIndex(a => a.id === appId);
-        if (idx === -1) { showToast('未找到申请'); return; }
-        if (apps[idx].status !== 'pending') { showToast('该申请已处理'); return; }
-        apps[idx].status = 'rejected';
-        apps[idx].reviewedBy = adminUsername || 'admin';
-        apps[idx].reviewedAt = new Date().toISOString();
-        apps[idx].adminDecision = 'rejected';
-        setStoredRegistrationApps(apps);
-        showToast(`已拒绝 ${apps[idx].username} 的注册申请`);
-        renderAdminReviewList();
-        renderAdminReviewNotification();
+        apiRequest('/api/admin/user-apps/' + encodeURIComponent(appId) + '/reject', {
+            method: 'POST'
+        }).then(function() {
+            showToast('注册申请已拒绝');
+            renderAdminReviewList();
+            renderAdminReviewNotification();
+        }).catch(function() {});
     }
 
     function initSchoolSelect() {
@@ -1253,7 +1256,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({
                 info: info,
                 questionnaireAnswers: currentQuestionnaireAnswers,
-                source: getStoredUser() ? 'user' : 'guest'
+                source: isUserLoggedIn ? 'user' : 'guest'
             })
         }).then(function() {
             currentQuestionnaireAnswers = null;

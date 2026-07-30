@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node start.js"
+    "dev": "node start.js",
+    "build": "node build-pages.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
