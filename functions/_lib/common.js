@@ -1,5 +1,5 @@
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const PBKDF2_ITERATIONS = 120000;
+const PBKDF2_ITERATIONS = 100000;
 
 let schemaReady = false;
 
