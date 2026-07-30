@@ -27,48 +27,19 @@ export function requireDb(env) {
 export async function ensureSchema(env) {
   if (schemaReady) return;
   const db = requireDb(env);
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS admins (
-      username TEXT PRIMARY KEY,
-      password_hash TEXT NOT NULL,
-      salt TEXT NOT NULL,
-      created_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS admin_sessions (
-      token TEXT PRIMARY KEY,
-      username TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      expires_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS records (
-      id TEXT PRIMARY KEY,
-      info_json TEXT NOT NULL,
-      answers_json TEXT NOT NULL,
-      source TEXT NOT NULL,
-      submit_time TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS user_accounts (
-      username TEXT PRIMARY KEY,
-      password_hash TEXT NOT NULL,
-      salt TEXT NOT NULL,
-      type TEXT,
-      created_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS registration_apps (
-      id TEXT PRIMARY KEY,
-      username TEXT NOT NULL,
-      password_hash TEXT NOT NULL,
-      salt TEXT NOT NULL,
-      type TEXT NOT NULL,
-      status TEXT NOT NULL,
-      submitted_at TEXT NOT NULL,
-      reviewed_by TEXT,
-      reviewed_at TEXT,
-      admin_decision TEXT
-    );
-    CREATE INDEX IF NOT EXISTS idx_records_submit_time ON records(submit_time);
-    CREATE INDEX IF NOT EXISTS idx_registration_apps_status ON registration_apps(status);
-  `);
+  const statements = [
+    `CREATE TABLE IF NOT EXISTS admins (username TEXT PRIMARY KEY, password_hash TEXT NOT NULL, salt TEXT NOT NULL, created_at TEXT NOT NULL);`,
+    `CREATE TABLE IF NOT EXISTS admin_sessions (token TEXT PRIMARY KEY, username TEXT NOT NULL, created_at TEXT NOT NULL, expires_at TEXT NOT NULL);`,
+    `CREATE TABLE IF NOT EXISTS records (id TEXT PRIMARY KEY, info_json TEXT NOT NULL, answers_json TEXT NOT NULL, source TEXT NOT NULL, submit_time TEXT NOT NULL);`,
+    `CREATE TABLE IF NOT EXISTS user_accounts (username TEXT PRIMARY KEY, password_hash TEXT NOT NULL, salt TEXT NOT NULL, type TEXT, created_at TEXT NOT NULL);`,
+    `CREATE TABLE IF NOT EXISTS registration_apps (id TEXT PRIMARY KEY, username TEXT NOT NULL, password_hash TEXT NOT NULL, salt TEXT NOT NULL, type TEXT NOT NULL, status TEXT NOT NULL, submitted_at TEXT NOT NULL, reviewed_by TEXT, reviewed_at TEXT, admin_decision TEXT);`,
+    `CREATE INDEX IF NOT EXISTS idx_records_submit_time ON records(submit_time);`,
+    `CREATE INDEX IF NOT EXISTS idx_registration_apps_status ON registration_apps(status);`
+  ];
+
+  for (const statement of statements) {
+    await db.exec(statement);
+  }
   schemaReady = true;
 }
 

@@ -1,4 +1,4 @@
-import { calculateStats, ensureSchema, json, normalizeRecord, requireAdmin } from '../../../_lib/common.js';
+import { calculateStats, ensureSchema, json, normalizeRecord, requireAdmin } from '../../_lib/common.js';
 
 export async function onRequestGet(context) {
   try {

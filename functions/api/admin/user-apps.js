@@ -1,4 +1,4 @@
-import { ensureSchema, json, requireAdmin } from '../../../_lib/common.js';
+import { ensureSchema, json, requireAdmin } from '../../_lib/common.js';
 
 export async function onRequestGet(context) {
   try {
